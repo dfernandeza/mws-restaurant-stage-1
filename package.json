@@ -1,0 +1,24 @@
+{
+  "name": "restaurant-app",
+  "version": "1.0.0",
+  "description": "Restaurant Reviews",
+  "main": "index.js",
+  "scripts": {
+    "build-images": "node ./scripts/build-images.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dfernandeza/mws-restaurant-stage-1.git"
+  },
+  "author": "Daniel Fernandez <danyfernandeza@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dfernandeza/mws-restaurant-stage-1/issues"
+  },
+  "homepage": "https://github.com/dfernandeza/mws-restaurant-stage-1#readme",
+  "dependencies": {
+    "imagemagick": "^0.1.3",
+    "imagemin": "^5.3.1",
+    "imagemin-jpegtran": "^5.0.2"
+  }
+}
