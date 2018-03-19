@@ -14,16 +14,14 @@
 <body class="inside">
   <!-- Beginning header -->
   <header>
-    <!-- Beginning nav -->
-    <nav>
-      <h1 class="page-title"><a href="/">Foodle</a></h1>
-    </nav>
+    <h1 class="page-title"><a href="/">Foodle</a></h1>
     <!-- Beginning breadcrumb -->
-    <ul id="breadcrumb" aria-label="Breadcrumb">
-      <li><a href="/">Home</a></li>
-    </ul>
+    <nav aria-label="Breadcrumb">
+      <ul id="breadcrumb">
+        <li><a href="/">Home</a></li>
+      </ul>
+    </nav>
     <!-- End breadcrumb -->
-    <!-- End nav -->
   </header>
   <!-- End header -->
 
@@ -35,7 +33,7 @@
      End map -->
     <!-- Beginning restaurant -->
     <section id="restaurant-container">
-      <h1 id="restaurant-name"></h1>
+      <h2 id="restaurant-name"></h1>
 
       <figure class="restaurant-figure">
         <figcaption class="restaurant-figure__caption">
@@ -48,7 +46,7 @@
 
       <div id="map-container">
         <p id="restaurant-address"></p>
-        <div id="map"></div>
+        <div id="map" role="application"></div>
       </div>
     </section>
     <!-- end restaurant -->

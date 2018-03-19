@@ -248,10 +248,20 @@ nav {
   top: 0;
   width: 100%;
   z-index: 1;
+  background-color: #000;
+}
+
+.inside .page-title {
+  text-align: center;
+}
+
+.inside nav {
+  height: 50px;
+  text-align: left;
 }
 
 .inside #maincontent {
-  padding: 150px 20px 60px;
+  padding: 180px 20px 60px;
 }
 
 .inside #map-container {
@@ -293,7 +303,6 @@ nav {
 
 #restaurant-img {
   width: 100%;
-  max-width: 800px;
 }
 
 #restaurant-address,
@@ -331,7 +340,7 @@ nav {
   margin: 40px auto;
 }
 
-#reviews-container h2 {
+#reviews-container h3 {
   color: #f58500;
   font-size: 24pt;
   font-weight: 300;
@@ -356,7 +365,6 @@ nav {
   padding: 20px;
   position: relative;
   width: 100%;
-  max-width: 600px;
   box-sizing: border-box;
 }
 

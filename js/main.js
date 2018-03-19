@@ -150,13 +150,13 @@ createRestaurantHTML = restaurant => {
   image.className = 'restaurant-card__img';
   image.src = thumbnail;
   image.srcset = `${thumbnail}, ${thumbnail2x} 2x`;
-  image.alt = `${restaurant.name}, ${restaurant.cuisine_type}`;
+  image.alt = `Image of ${restaurant.name} restaurant`;
   li.append(image);
 
   const body = document.createElement('div');
   body.className = 'restaurant-card__body';
 
-  const name = document.createElement('h1');
+  const name = document.createElement('h2');
   name.innerHTML = restaurant.name;
   body.append(name);
 
