@@ -3,8 +3,8 @@
 const imagemin = require('imagemin');
 const imageminJpegtran = require('imagemin-jpegtran');
 const im = require('imagemagick');
-const images_src_path = './img/';
-const images_dist_path = `${images_src_path}/dist/`;
+const images_src_path = './src/img/';
+const images_dist_path = './dist/img/';
 const images = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 const config = {
 	quality: 0.85,

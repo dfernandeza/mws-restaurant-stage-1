@@ -1,6 +1,4 @@
 let restaurants, neighborhoods, cuisines;
-var map;
-var markers = [];
 
 /**
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
@@ -117,6 +115,7 @@ updateRestaurants = () => {
 resetRestaurants = restaurants => {
   // Remove all restaurants
   self.restaurants = [];
+  self.markers = self.markers || [];
   const ul = document.getElementById('restaurants-list');
   ul.innerHTML = '';
 
