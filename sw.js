@@ -1,4 +1,4 @@
-const staticCache = 'foodle-static-v0';
+const staticCache = 'foodle-static-v1';
 const imagesCache = 'foodle-images-v0';
 const allCaches = [staticCache, imagesCache];
 
@@ -8,6 +8,7 @@ self.addEventListener('install', function(event) {
       return cache.addAll([
         '/',
         '/restaurant.html',
+        '/idb.js',
         '/helpers-bundle.js',
         '/home-bundle.js',
         '/restaurant-bundle.js',

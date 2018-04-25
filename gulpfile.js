@@ -22,7 +22,10 @@ gulp.task('copy-images', function() {
 });
 
 gulp.task('js-dist-helpers', function() {
-  return gulp.src(['./src/js/offline.js', './src/js/dbhelper.js'])
+  return gulp.src([
+      './src/js/offline.js', 
+      './src/js/dbhelper.js'
+    ])
 		.pipe(sourcemaps.init())
   	.pipe(babel({
       presets: [['env', { 'modules': false }]],
@@ -61,10 +64,17 @@ gulp.task('js-dist-restaurant', function() {
     .pipe(browserSync.stream());
 });
 
+gulp.task('js-dist-idb', function() {
+  return gulp.src('./node_modules/idb/lib/idb.js')
+    .pipe(uglify({ toplevel: true }))
+    .pipe(gulp.dest(DIST_DEST));
+});
+
 gulp.task('js-dist', [
   'js-dist-helpers', 
   'js-dist-home', 
-  'js-dist-restaurant'
+  'js-dist-restaurant',
+  'js-dist-idb'
 ]);
 
 gulp.task('css-dist', function () {
@@ -92,14 +102,6 @@ gulp.task('dist', [
   'css-dist',
   'sw-dist'
 ]);
-
-/* gulp.task('browser-sync', function() {
-  browserSync.init({
-    server: {
-      baseDir: './dist'
-    }
-  });
-});*/
 
 gulp.task('serve', ['dist'], function() {
 

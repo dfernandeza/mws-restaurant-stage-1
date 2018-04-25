@@ -1,8 +1,23 @@
+const DATABASE_VERSION = 1;
+
+function _openDatabase() {
+  if (!navigator.serviceWorker) {
+    return Promise.resolve();
+  }
+  return idb.open('foodle', DATABASE_VERSION, upgradeDb => {
+    const store = upgradeDb.createObjectStore('restaurants', {
+      keyPath: 'id'
+    });
+    store.createIndex('by-date', 'createdAt');
+  });
+}
+
+const dbPromise = _openDatabase();
+
 /**
  * Common database helper functions.
  */
 class DBHelperClass {
-
   /**
    * Database URL.
    * Change this to restaurants.json file location on your server.
@@ -15,11 +30,55 @@ class DBHelperClass {
   /**
    * Fetch all restaurants.
    */
-  static fetchRestaurants(callback) {    
-    fetch(DBHelper.DATABASE_URL)
-      .then(data => data.json())
-      .then(restaurants => callback(null, restaurants))
-      .catch(error => callback(error, null));
+  static fetchRestaurants(callback) {
+    dbPromise
+      .then(function(db) {
+        if (!db) return;
+        const index = db
+          .transaction('restaurants')
+          .objectStore('restaurants')
+          .index('by-date');
+
+        return index
+          .getAll()
+          .then(function(restaurants) {
+            callback(null, restaurants);
+          })
+          .catch(error => callback(error, null));
+      })
+      .then(() => {
+        fetch(DBHelper.DATABASE_URL)
+          .then(data => data.json())
+          .then(restaurants => {
+            // cache restaurants
+            dbPromise
+              .then(function(db) {
+                if (!db) return;
+                const tx = db.transaction('restaurants', 'readwrite');
+                const store = tx.objectStore('restaurants');
+                const dateIndex = store.index('by-date');
+                restaurants.forEach(function(restaurant) {
+                  store.put(restaurant);
+                });
+                // There's not more than 10 restaurantsin the db at the moment
+                // but this would be needed if the db keep growing.
+                return dateIndex.openCursor(null, 'prev');
+              })
+              .then(cursor => {
+                if (!cursor) return;
+                return cursor.advance(10);
+              })
+              .then(function removeOld(cursor) {
+                if (!cursor) return;
+                cursor.delete();
+                return cursor.continue().then(removeOld);
+              });
+
+            return restaurants;
+          })
+          .then(restaurants => callback(null, restaurants))
+          .catch(error => callback(error, null));
+      });
   }
 
   /**
@@ -29,7 +88,7 @@ class DBHelperClass {
     fetch(DBHelper.DATABASE_URL + id)
       .then(data => data.json())
       .then(restaurant => callback(null, restaurant))
-      .catch(error => callback(error, null));;
+      .catch(error => callback(error, null));
   }
 
   /**
@@ -38,7 +97,6 @@ class DBHelperClass {
   static fetchRestaurantByCuisine(cuisine, callback) {
     // Fetch all restaurants  with proper error handling
     DBHelper.fetchRestaurants((error, restaurants) => {
-      console.log(restaurants);
       if (error) {
         callback(error, null);
       } else {
@@ -68,18 +126,23 @@ class DBHelperClass {
   /**
    * Fetch restaurants by a cuisine and a neighborhood with proper error handling.
    */
-  static fetchRestaurantByCuisineAndNeighborhood(cuisine, neighborhood, callback) {
+  static fetchRestaurantByCuisineAndNeighborhood(
+    cuisine,
+    neighborhood,
+    callback
+  ) {
     // Fetch all restaurants
     DBHelper.fetchRestaurants((error, restaurants) => {
-      console.log(restaurants);
       if (error) {
         callback(error, null);
       } else {
-        let results = restaurants
-        if (cuisine != 'all') { // filter by cuisine
+        let results = restaurants;
+        if (cuisine != 'all') {
+          // filter by cuisine
           results = results.filter(r => r.cuisine_type == cuisine);
         }
-        if (neighborhood != 'all') { // filter by neighborhood
+        if (neighborhood != 'all') {
+          // filter by neighborhood
           results = results.filter(r => r.neighborhood == neighborhood);
         }
         callback(null, results);
@@ -97,9 +160,13 @@ class DBHelperClass {
         callback(error, null);
       } else {
         // Get all neighborhoods from all restaurants
-        const neighborhoods = restaurants.map((v, i) => restaurants[i].neighborhood)
+        const neighborhoods = restaurants.map(
+          (v, i) => restaurants[i].neighborhood
+        );
         // Remove duplicates from neighborhoods
-        const uniqueNeighborhoods = neighborhoods.filter((v, i) => neighborhoods.indexOf(v) == i)
+        const uniqueNeighborhoods = neighborhoods.filter(
+          (v, i) => neighborhoods.indexOf(v) == i
+        );
         callback(null, uniqueNeighborhoods);
       }
     });
@@ -115,9 +182,11 @@ class DBHelperClass {
         callback(error, null);
       } else {
         // Get all cuisines from all restaurants
-        const cuisines = restaurants.map((v, i) => restaurants[i].cuisine_type)
+        const cuisines = restaurants.map((v, i) => restaurants[i].cuisine_type);
         // Remove duplicates from cuisines
-        const uniqueCuisines = cuisines.filter((v, i) => cuisines.indexOf(v) == i)
+        const uniqueCuisines = cuisines.filter(
+          (v, i) => cuisines.indexOf(v) == i
+        );
         callback(null, uniqueCuisines);
       }
     });
@@ -127,7 +196,7 @@ class DBHelperClass {
    * Restaurant page URL.
    */
   static urlForRestaurant(restaurant) {
-    return (`./restaurant.html?id=${restaurant.id}`);
+    return `./restaurant.html?id=${restaurant.id}`;
   }
 
   /**
@@ -136,10 +205,10 @@ class DBHelperClass {
   static imageUrlForRestaurant({ photograph = '1' }, size = 'lg') {
     const imageSizes = {
       lg: `${photograph}.jpg`,
-      sm: `${photograph}_sm.jpg`, // photograph.replace('.jpg', '_sm.jpg'),
-      sm2x: `${photograph}_sm2x.jpg`// photograph.replace('.jpg', '_sm2x.jpg')
+      sm: `${photograph}_sm.jpg`,
+      sm2x: `${photograph}_sm2x.jpg`
     };
-    return (`/img/${imageSizes[size]}`);
+    return `/img/${imageSizes[size]}`;
   }
 
   /**
@@ -151,11 +220,10 @@ class DBHelperClass {
       title: restaurant.name,
       url: DBHelper.urlForRestaurant(restaurant),
       map: map,
-      animation: google.maps.Animation.DROP}
-    );
+      animation: google.maps.Animation.DROP
+    });
     return marker;
   }
-
 }
 
 window.DBHelper = DBHelperClass;
