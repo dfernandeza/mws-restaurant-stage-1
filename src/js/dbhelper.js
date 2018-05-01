@@ -5,10 +5,14 @@ function _openDatabase() {
     return Promise.resolve();
   }
   return idb.open('foodle', DATABASE_VERSION, upgradeDb => {
-    const store = upgradeDb.createObjectStore('restaurants', {
-      keyPath: 'id'
-    });
-    store.createIndex('by-date', 'createdAt');
+    switch (upgradeDb.oldVersion) {
+      case 0:
+        const store = upgradeDb.createObjectStore('restaurants', {
+          keyPath: 'id'
+        });
+        store.createIndex('id', 'id');
+        store.createIndex('by-date', 'createdAt');
+    }
   });
 }
 
@@ -41,12 +45,10 @@ class DBHelperClass {
 
         return index
           .getAll()
-          .then(function(restaurants) {
-            callback(null, restaurants);
-          })
+          .then(restaurants => callback(null, restaurants))
           .catch(error => callback(error, null));
       })
-      .then(() => {
+      .then(() =>
         fetch(DBHelper.DATABASE_URL)
           .then(data => data.json())
           .then(restaurants => {
@@ -66,6 +68,7 @@ class DBHelperClass {
               })
               .then(cursor => {
                 if (!cursor) return;
+                // Store the last 10 restaurants
                 return cursor.advance(10);
               })
               .then(function removeOld(cursor) {
@@ -77,18 +80,47 @@ class DBHelperClass {
             return restaurants;
           })
           .then(restaurants => callback(null, restaurants))
-          .catch(error => callback(error, null));
-      });
+          .catch(error => callback(error, null))
+      );
   }
 
   /**
    * Fetch a restaurant by its ID.
    */
   static fetchRestaurantById(id, callback) {
-    fetch(DBHelper.DATABASE_URL + id)
-      .then(data => data.json())
-      .then(restaurant => callback(null, restaurant))
-      .catch(error => callback(error, null));
+    dbPromise
+      .then(function(db) {
+        if (!db) return;
+        const index = db
+          .transaction('restaurants')
+          .objectStore('restaurants')
+          .index('id');
+
+        return index
+          .get(parseInt(id, 10))
+          .then(restaurant => { 
+            callback(null, restaurant);
+            return restaurant;
+          })
+          .catch(error => callback(error, null));
+      })
+      .then(cachedRestaurant =>
+        fetch(DBHelper.DATABASE_URL + id)
+          .then(data => data.json())
+          // cache the restaurant
+          .then(restaurant =>
+            dbPromise.then(function(db) {
+              if (!db) return;
+              const tx = db.transaction('restaurants', 'readwrite');
+              const store = tx.objectStore('restaurants');
+              store.put(restaurant);
+
+              return restaurant;
+            })
+          )
+          .then(restaurant => !cachedRestaurant && callback(null, restaurant))
+          .catch(error => callback(error, null))
+      );
   }
 
   /**

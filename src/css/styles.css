@@ -142,15 +142,21 @@ nav {
 }
 /* ====================== Map ====================== */
 #map {
-  height: 400px;
+  height: 0;
   width: 100%;
   background-color: #ccc;
+  transition: height .3s ease-out;
 }
+#map.map--open {
+  height: 400px;
+}
+
 /* ====================== Restaurant Filtering ====================== */
 .filter-options {
   background-color: #3397db;
   align-items: center;
-  padding: 10px;
+  padding: 30px 10px 20px;
+  position: relative;
 }
 
 .filter-options h2 {
@@ -183,6 +189,18 @@ nav {
   margin-right: 0;
 }
 
+#open-map-btn {
+  width: 100px;
+  height: 40px;
+  border-radius: 5px;
+  font-size: 14px;
+  position: absolute;
+  top: 15px;
+  right: 10px;
+  background: #f18200;
+  color: #fff;
+}
+
 /* ====================== Restaurant Listing ====================== */
 #restaurants-list {
   background-color: #f3f3f3;
@@ -192,6 +210,7 @@ nav {
   flex-wrap: wrap;
   flex-flow: row wrap;
   justify-content: center;
+  margin: 0;
 }
 
 .restaurant-card {
@@ -230,7 +249,7 @@ nav {
 }
 
 .restaurant-card__body a {
-  background-color: orange;
+  background-color: #f18200;
   border-bottom: 3px solid #eee;
   color: #fff;
   display: block;

@@ -23,6 +23,7 @@ gulp.task('copy-images', function() {
 
 gulp.task('js-dist-helpers', function() {
   return gulp.src([
+      './src/js/utils.js',
       './src/js/offline.js', 
       './src/js/dbhelper.js'
     ])

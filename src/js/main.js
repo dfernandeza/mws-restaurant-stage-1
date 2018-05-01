@@ -1,11 +1,42 @@
-let restaurants, neighborhoods, cuisines;
+const MAP_URI = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyCmUsxSG50Sw0vo6Z2wubsyIefmz2LgQEw&libraries=places&callback=initMap';
+let restaurants,
+  neighborhoods,
+  cuisines,
+  mapLoaded = false,
+  mapOpen = false;
 
 /**
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
  */
 document.addEventListener('DOMContentLoaded', event => {
+  updateRestaurants();
   fetchNeighborhoods();
   fetchCuisines();
+});
+
+// Lazy load map 
+document.querySelector('#open-map-btn').addEventListener('click', event => {
+  const openClass = 'map--open';
+  const openText = 'Show map';
+  const closeText = 'Hide map';
+  const mapEl = document.querySelector('#map');
+  const buttonEl = event.target;
+
+  if (!mapLoaded) {
+    getScript(MAP_URI, () => {
+      mapLoaded = true;
+      addMarkersToMap();
+    });
+  }
+  if (mapOpen) {
+    mapEl.classList.remove(openClass);
+    buttonEl.innerText = openText;
+    mapOpen = false;
+  } else {
+    mapEl.classList.add(openClass);
+    buttonEl.innerText = closeText;
+    mapOpen = true;
+  }
 });
 
 /**
@@ -78,7 +109,6 @@ window.initMap = () => {
     center: loc,
     scrollwheel: false
   });
-  updateRestaurants();
 };
 
 /**
@@ -133,7 +163,9 @@ fillRestaurantsHTML = (restaurants = self.restaurants) => {
   restaurants.forEach(restaurant => {
     ul.append(createRestaurantHTML(restaurant));
   });
-  addMarkersToMap();
+  if (mapLoaded) {
+    addMarkersToMap();
+  } 
 };
 
 /**
