@@ -234,7 +234,7 @@ class DBHelperClass {
   /**
    * Restaurant image URL.
    */
-  static imageUrlForRestaurant({ photograph = '1' }, size = 'lg') {
+  static imageUrlForRestaurant({ photograph = 'foodle' }, size = 'lg') {
     const imageSizes = {
       lg: `${photograph}.jpg`,
       sm: `${photograph}_sm.jpg`,
