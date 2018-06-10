@@ -4,6 +4,16 @@ let restaurants,
   cuisines,
   mapLoaded = false,
   mapOpen = false;
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => { 
+      if (entry.isIntersecting) {
+        loadImg(entry.target);
+      } 
+    });
+  }, {
+    rootMargin: '0px 0px',
+    threshold: 0.25
+  });  
 
 /**
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
@@ -38,6 +48,12 @@ document.querySelector('#open-map-btn').addEventListener('click', event => {
     mapOpen = true;
   }
 });
+
+loadImg = imgEl => {
+  imgEl.src = imgEl.dataSet.src;
+  imgEl.srcset = imgEl.dataSet.srcset;
+  imgEl.onload = () => imgEl.classList.add('restaurant-card__img--loaded');
+};
 
 /**
  * Fetch all neighborhoods and set their HTML.
@@ -134,6 +150,7 @@ updateRestaurants = () => {
       } else {
         resetRestaurants(restaurants);
         fillRestaurantsHTML();
+        document.querySelectorAll('.restaurant-card__img').forEach(el => observer.observe(el));
       }
     }
   );
@@ -179,8 +196,7 @@ createRestaurantHTML = restaurant => {
   const thumbnail = DBHelper.imageUrlForRestaurant(restaurant, 'sm');
   const thumbnail2x = DBHelper.imageUrlForRestaurant(restaurant, 'sm2x');
   image.className = 'restaurant-card__img';
-  image.src = thumbnail;
-  image.srcset = `${thumbnail}, ${thumbnail2x} 2x`;
+  image.dataSet = { src: thumbnail, srcset: `${thumbnail}, ${thumbnail2x} 2x` };
   image.alt = `Image of ${restaurant.name} restaurant`;
   li.append(image);
 

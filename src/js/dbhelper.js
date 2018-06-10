@@ -1,9 +1,6 @@
 const DATABASE_VERSION = 1;
 
 function _openDatabase() {
-  if (!navigator.serviceWorker) {
-    return Promise.resolve();
-  }
   return idb.open('foodle', DATABASE_VERSION, upgradeDb => {
     switch (upgradeDb.oldVersion) {
       case 0:

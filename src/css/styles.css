@@ -226,6 +226,12 @@ nav {
   margin: 0;
   width: 100%;
   min-height: 248px;
+  opacity: 0;
+  transition: opacity .35s ease-out;
+}
+
+.restaurant-card__img--loaded {
+  opacity: 1;
 }
 
 .restaurant-card__body {
