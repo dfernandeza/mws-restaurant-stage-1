@@ -192,6 +192,7 @@ nav {
 #open-map-btn {
   width: 100px;
   height: 40px;
+  border: none;
   border-radius: 5px;
   font-size: 14px;
   position: absolute;
@@ -218,6 +219,14 @@ nav {
   margin: 15px 5px;
   min-height: 380px;
   width: 320px;
+  position: relative;
+}
+
+.favorite-star {
+  position: absolute;
+  right: 0;
+  top: 5px;
+  fill: #ffff00;
 }
 
 .restaurant-card__img {
@@ -349,7 +358,8 @@ nav {
 }
 
 #restaurant-container,
-#reviews-container {
+#reviews-container,
+#fav-container {
   max-width: 900px;
 }
 
@@ -361,7 +371,7 @@ nav {
   margin: auto;
 }
 
-#reviews-container {
+#fav-container, #reviews-container {
   margin: 40px auto;
 }
 

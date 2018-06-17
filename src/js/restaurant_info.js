@@ -21,6 +21,16 @@ window.initMap = () => {
 }
 
 /**
+ * Listen for the 'mark as favorite' event
+ */
+document.getElementById('favorite').addEventListener('change', event => {
+  event.preventDefault();
+  if (self.restaurant) {
+    DBHelper.markAsFavorite(self.restaurant.id, event.target.checked);
+  }
+});
+
+/**
  * Get current restaurant from page URL.
  */
 fetchRestaurantFromURL = (callback) => {
@@ -71,6 +81,13 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   if (restaurant.operating_hours) {
     fillRestaurantHoursHTML();
   }
+
+  // set is_favorite flag
+  const favoriteCheckbox = document.getElementById('favorite');
+  if (restaurant.is_favorite) {
+    favoriteCheckbox.setAttribute('checked', '');
+  }
+
   // fill reviews
   fillReviewsHTML();
 }

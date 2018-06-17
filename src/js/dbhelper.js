@@ -222,6 +222,30 @@ class DBHelperClass {
   }
 
   /**
+   * Mark a restaurant as favorite
+   */
+  static markAsFavorite(rid, isFavorite, callback = () => null) {
+    fetch(`${DBHelper.DATABASE_URL}${rid}`, { 
+      method: 'PUT',
+      body: JSON.stringify({ is_favorite: isFavorite && isFavorite !== 'false' ? true : false }),
+      headers:{
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(data => data.json())
+      .then(restaurant => {
+        dbPromise.then(db => {
+          const tx = db.transaction('restaurants', 'readwrite');
+          const store = tx.objectStore('restaurants');
+
+          callback(null, restaurant);
+          return store.put(restaurant);
+        });
+      })
+      .catch(error => callback(error, null));
+  }
+
+  /**
    * Restaurant page URL.
    */
   static urlForRestaurant(restaurant) {

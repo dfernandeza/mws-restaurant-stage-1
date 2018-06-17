@@ -192,6 +192,21 @@ createRestaurantHTML = restaurant => {
   const li = document.createElement('li');
   li.className = 'restaurant-card';
 
+  if (restaurant.is_favorite) {
+    const ns = 'http://www.w3.org/2000/svg';
+    const favIcon = document.createElementNS(ns, 'svg');
+    favIcon.setAttributeNS (null, 'width', 25);
+    favIcon.setAttributeNS (null, 'height', 23);
+    favIcon.setAttributeNS (null, 'class', 'favorite-star');
+
+    const polygon = document.createElementNS(ns, 'polygon');
+    polygon.setAttributeNS(null, 'points', '9.9, 1.1, 3.3, 21.78, 19.8, 8.58, 0, 8.58, 16.5, 21.78');
+    polygon.setAttributeNS(null, 'style', 'fill-rule:nonzero;');
+
+    favIcon.appendChild(polygon);
+    li.append(favIcon);
+  }
+
   const image = document.createElement('img');
   const thumbnail = DBHelper.imageUrlForRestaurant(restaurant, 'sm');
   const thumbnail2x = DBHelper.imageUrlForRestaurant(restaurant, 'sm2x');
