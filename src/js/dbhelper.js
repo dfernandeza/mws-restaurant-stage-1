@@ -1,14 +1,23 @@
-const DATABASE_VERSION = 1;
+const DATABASE_VERSION = 2;
 
 function _openDatabase() {
   return idb.open('foodle', DATABASE_VERSION, upgradeDb => {
     switch (upgradeDb.oldVersion) {
-      case 0:
+      case 0: {
         const store = upgradeDb.createObjectStore('restaurants', {
           keyPath: 'id'
         });
         store.createIndex('id', 'id');
+        store.createIndex('by-date', 'createdAt'); 
+      }
+      case 1: {
+        const store = upgradeDb.createObjectStore('reviews', {
+          keyPath: 'id'
+        });
+        store.createIndex('id', 'id');
         store.createIndex('by-date', 'createdAt');
+        store.createIndex('by-restaurant', 'restaurant_id');
+      }
     }
   });
 }
@@ -26,6 +35,14 @@ class DBHelperClass {
   static get DATABASE_URL() {
     const port = 1337;
     return `http://localhost:${port}/restaurants/`;
+  }
+
+  /**
+   * Reviews database URL.
+   */
+  static get REVIEWS_DATABASE_URL() {
+    const port = 1337;
+    return `http://localhost:${port}/reviews/`;
   }
 
   /**
@@ -222,6 +239,59 @@ class DBHelperClass {
   }
 
   /**
+   * Fetch reviews by restaurant with proper error handling.
+   */
+  static fetchReviewsByRestaurant(rid, callback) {
+    dbPromise
+    .then(function(db) {
+      if (!db) return;
+      const index = db
+        .transaction('reviews')
+        .objectStore('reviews')
+        .index('by-restaurant');
+
+      return index
+        .get(parseInt(rid, 10))
+        .then(reviews => callback(null, reviews))
+        .catch(error => callback(error, null));
+    })
+    .then(() =>
+      fetch(`${DBHelper.REVIEWS_DATABASE_URL}?restaurant_id=${rid}`)
+        .then(data => data.json())
+        .then(reviews => {
+          // cache reviews
+          dbPromise
+            .then(function(db) {
+              if (!db) return;
+              const tx = db.transaction('reviews', 'readwrite');
+              const store = tx.objectStore('reviews');
+              const dateIndex = store.index('by-date');
+
+              reviews.forEach(function(review) {
+                store.put(review);
+              });
+
+              return dateIndex.openCursor(null, 'prev');
+            })
+            .then(cursor => {
+              if (!cursor) return;
+              // Store the last 10 reviews
+              return cursor.advance(10);
+            })
+            .then(function removeOld(cursor) {
+              if (!cursor) return;
+              cursor.delete();
+              return cursor.continue().then(removeOld);
+            });
+
+          return reviews;
+        })
+        .then(reviews => callback(null, reviews))
+        .catch(error => callback(error, null))
+    );
+  }
+
+  /**
    * Mark a restaurant as favorite
    */
   static markAsFavorite(rid, isFavorite, callback = () => null) {
@@ -243,6 +313,33 @@ class DBHelperClass {
         });
       })
       .catch(error => callback(error, null));
+  }
+
+  /**
+   * Add a Review.
+   */
+  static addReview(review, callback = () => null) {
+    fetch(DBHelper.REVIEWS_DATABASE_URL, {
+      method: 'POST',
+      body: JSON.stringify(review),
+      headers:{
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(data => data.json())
+    // cache the review
+    .then(review =>
+      dbPromise.then(function(db) {
+        if (!db) return;
+        const tx = db.transaction('reviews', 'readwrite');
+        const store = tx.objectStore('reviews');
+        store.put(review);
+
+        return review;
+      })
+    )
+    .then(review => callback(null, review))
+    .catch(error => callback(error, null));
   }
 
   /**

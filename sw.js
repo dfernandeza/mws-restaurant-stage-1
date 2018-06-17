@@ -1,4 +1,4 @@
-const staticCache = 'foodle-static-v6';
+const staticCache = 'foodle-static-v7';
 const imagesCache = 'foodle-images-v0';
 const allCaches = [staticCache, imagesCache];
 

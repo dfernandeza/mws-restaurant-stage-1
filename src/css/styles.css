@@ -383,6 +383,36 @@ nav {
   padding-bottom: 1pt;
 }
 
+.add-review-fieldset {
+  border: none;
+  display: flex;
+  padding: 0;
+  margin: 0;
+}
+
+.add-review-fieldset__input, 
+.add-review-fieldset__textarea {
+  border: none;
+  padding: 5px;
+  margin: 5px 0 10px;
+}
+
+.add-review-fieldset__textarea {
+  width: 275px;
+  height: 160px;
+}
+
+.add-review-button {
+  border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  background: #f18200;
+  color: #fff;
+  padding: 5px;
+  min-width: 100px;
+  margin-bottom: 50px;
+}
+
 #reviews-list {
   margin: 0;
   padding: 0;

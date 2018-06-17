@@ -15,6 +15,12 @@ window.initMap = () => {
         scrollwheel: false
       });
       fillBreadcrumb();
+      DBHelper.fetchReviewsByRestaurant(self.restaurant.id, (error, reviews) => {
+        // fill reviews
+        if (reviews && reviews.length) {
+          fillReviewsHTML(reviews);
+        }
+      });
       DBHelper.mapMarkerForRestaurant(self.restaurant, self.map);
     }
   });
@@ -28,6 +34,28 @@ document.getElementById('favorite').addEventListener('change', event => {
   if (self.restaurant) {
     DBHelper.markAsFavorite(self.restaurant.id, event.target.checked);
   }
+});
+
+/**
+ * Listen for the 'add review' event
+ */
+document.getElementById('add-review-form').addEventListener('submit', event => {
+  event.preventDefault();
+
+  const name = event.target.name.value;
+  const rating = event.target.rating.value;
+  const comments = event.target.comments.value;
+  
+  DBHelper.addReview({
+    restaurant_id: self.restaurant.id,
+    name,
+    rating,
+    comments
+  }, (error, review) => {
+    const ul = document.getElementById('reviews-list');
+    ul.appendChild(createReviewHTML(review));
+    event.target.reset();
+  });
 });
 
 /**
@@ -87,9 +115,6 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   if (restaurant.is_favorite) {
     favoriteCheckbox.setAttribute('checked', '');
   }
-
-  // fill reviews
-  fillReviewsHTML();
 }
 
 /**
@@ -149,7 +174,7 @@ createReviewHTML = (review) => {
   li.appendChild(name);
 
   const date = document.createElement('p');
-  date.innerHTML = review.date;
+  date.innerHTML = new Date(review.createdAt).toLocaleString();
   li.appendChild(date);
 
   const rating = document.createElement('p');

@@ -44,6 +44,20 @@
       <label for="favorite">Mark as favorite: <input type="checkbox" name="favorite" id="favorite"></label>
     </section>
     <section id="reviews-container">
+      <h3>Add a review:</h3>
+      <form action="http://localhost:1337/reviews/" method="POST" id="add-review-form">
+        <fieldset class="add-review-fieldset">
+          <label class="add-review-fieldset__label" for="r-name">Name</label>
+          <input class="add-review-fieldset__input" type="text" name="name" id="r-name">
+
+          <label class="add-review-fieldset__label" for="r-rating">Rating</label>
+          <input class="add-review-fieldset__input" type="number" name="rating" id="r-rating" min="0" max="5">
+
+          <label class="add-review-fieldset__label" for="r-comments">Comments</label>
+          <textarea class="add-review-fieldset__textarea" name="comments" id="r-comments"></textarea>
+        </fieldset>
+        <button class="add-review-button">Add</button>
+      </form>
       <ul id="reviews-list"></ul>
     </section>
   </main>
