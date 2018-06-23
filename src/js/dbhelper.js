@@ -1,4 +1,4 @@
-const DATABASE_VERSION = 2;
+const DATABASE_VERSION = 3;
 
 function _openDatabase() {
   return idb.open('foodle', DATABASE_VERSION, upgradeDb => {
@@ -17,6 +17,13 @@ function _openDatabase() {
         store.createIndex('id', 'id');
         store.createIndex('by-date', 'createdAt');
         store.createIndex('by-restaurant', 'restaurant_id');
+      }
+      case 2: {
+        const store = upgradeDb.createObjectStore('pending_requests', {
+          keyPath: 'id',
+          autoIncrement: true
+        });
+        store.createIndex('by-date', 'createdAt');
       }
     }
   });
@@ -342,6 +349,50 @@ class DBHelperClass {
     .catch(error => {
       callback(error, null); 
     });
+  }
+
+  /**
+   * Add pending request
+   */
+  static addPendingRequest(request, callback = () => null) {
+    dbPromise
+      .then(function(db) {
+        if (!db) return;
+        const tx = db.transaction('pending_requests', 'readwrite');
+        const store = tx.objectStore('pending_requests');
+        store.put(request);
+
+        return request;
+      })
+      .then(request => callback(null, request))
+      .catch(error => {
+        callback(error, null); 
+      });
+  }
+
+  /**
+   * Fetch all pending requests and empty the cache 
+   */
+  static fetchPendingRequests(callback = () => null) {
+    dbPromise
+      .then(function(db) {
+        if (!db) return;
+        const tx = db.transaction('pending_requests', 'readwrite');
+        const requests = [];
+
+        tx
+        .objectStore('pending_requests')
+        .iterateCursor(cursor => {
+            if (!cursor) return;
+            requests.push(cursor.value);
+            cursor.delete();
+            cursor.continue();
+          });
+
+          tx.complete
+          .then(() => callback(null, requests))
+          .catch(error => callback(error, null));
+      });
   }
 
   /**

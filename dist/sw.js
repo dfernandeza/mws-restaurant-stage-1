@@ -54,11 +54,32 @@ self.addEventListener('fetch', function(event) {
     }
   }
 
-  if (/^\/(restaurants|reviews)'/.test(requestUrl.pathname) && methods.includes(event.request.method)) {
+  if (/^\/(restaurants|reviews)/.test(requestUrl.pathname) && methods.includes(event.request.method)) {
     const req = event.request.clone();
-    event.respondWith(fetch(req)).catch(console.log);//
+    event.respondWith(fetch(event.request)
+    // Handle failed requests
+    .catch(error => {
+      req.clone().json().then(body => {
+        self.clients.matchAll().then(clients => 
+          clients.forEach(client => 
+            client.postMessage({
+              message: 'failed_request',
+              request: {
+                url: req.url,
+                method: req.method,
+                body,
+                createdAt: Date.now()
+              }
+            })
+          ));
+      });
+      return new Promise((resolve, reject) => reject(error));
+    }));
     return;
   }
+
+  // ignore the rest
+  if (/^\/(restaurants|reviews)/.test(requestUrl.pathname)) { return; }
 
   event.respondWith(
     caches
@@ -69,8 +90,11 @@ self.addEventListener('fetch', function(event) {
 
 self.addEventListener('sync', function(event) {
   if (event.tag == 'foodle-sync') {
-    // event.waitUntil(doSomeStuff());
-    console.log('syncing...', idb);
+    event.waitUntil(
+      self.clients.matchAll().then(clients => 
+        clients.forEach(client => client.postMessage({ message: 'sync' }))
+      )
+    );
   } else {
     // unknown sync, may be old, best to unregister
     event.registration.unregister();

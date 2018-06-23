@@ -8,6 +8,7 @@ const uglify = require('gulp-uglify');
 const babel = require('gulp-babel');
 const sourcemaps = require('gulp-sourcemaps');
 const uglifycss = require('gulp-uglifycss');
+const critical = require('critical');
 const browserSync = require('browser-sync').create();
 
 gulp.task('copy-html', function() {
@@ -24,13 +25,13 @@ gulp.task('copy-images', function() {
 gulp.task('js-dist-helpers', function() {
   return gulp.src([
       './src/js/utils.js',
-      './src/js/offline.js', 
-      './src/js/dbhelper.js'
+      './src/js/dbhelper.js',
+      './src/js/offline.js'
     ])
 		.pipe(sourcemaps.init())
   	.pipe(babel({
       presets: [['env', { 'modules': false }]],
-      plugins: ['transform-class-properties']
+      plugins: ['transform-class-properties', 'transform-object-rest-spread']
     }))
     .pipe(concat('helpers-bundle.js'))
     .pipe(uglify({ toplevel: true, mangle: { reserved: ['DBHelper', 'DBHelperClass'] } }))
@@ -90,6 +91,29 @@ gulp.task('css-dist', function () {
     .pipe(browserSync.stream());
 });
 
+gulp.task('critical', function(cb) {
+  critical.generate({
+    inline: true,
+    base: 'dist/',
+    src: 'index.html',
+    css: ['./dist/styles.css'],
+    dimensions: [{
+      width: 320,
+      height: 480
+    },{
+      width: 768,
+      height: 1024
+    },{
+      width: 1280,
+      height: 960
+    }],
+    dest: 'index.html',
+    minify: true,
+    extract: false
+  });
+  cb();
+});
+
 gulp.task('sw-dist', function () {
   gulp.src('./sw.js')
     .pipe(gulp.dest(DIST_DEST))
@@ -101,6 +125,7 @@ gulp.task('dist', [
 	'copy-html', 
 	'js-dist',
   'css-dist',
+  'critical',
   'sw-dist'
 ]);
 

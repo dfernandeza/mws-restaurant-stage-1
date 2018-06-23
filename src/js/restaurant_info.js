@@ -54,9 +54,11 @@ document.getElementById('add-review-form').addEventListener('submit', event => {
     rating,
     comments
   }, (error, review) => {
+    event.target.reset();
+    
+    if (error || !review) { return; }
     const ul = document.getElementById('reviews-list');
     ul.appendChild(createReviewHTML(review));
-    event.target.reset();
   });
 });
 
