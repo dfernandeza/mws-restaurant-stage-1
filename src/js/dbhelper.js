@@ -251,7 +251,7 @@ class DBHelperClass {
         .index('by-restaurant');
 
       return index
-        .get(parseInt(rid, 10))
+        .getAll(parseInt(rid, 10))
         .then(reviews => callback(null, reviews))
         .catch(error => callback(error, null));
     })
@@ -265,13 +265,13 @@ class DBHelperClass {
               if (!db) return;
               const tx = db.transaction('reviews', 'readwrite');
               const store = tx.objectStore('reviews');
-              const dateIndex = store.index('by-date');
+              const index = store.index('by-restaurant');
 
               reviews.forEach(function(review) {
                 store.put(review);
               });
 
-              return dateIndex.openCursor(null, 'prev');
+              return index.openCursor(null, 'prev');
             })
             .then(cursor => {
               if (!cursor) return;
@@ -339,7 +339,9 @@ class DBHelperClass {
       })
     )
     .then(review => callback(null, review))
-    .catch(error => callback(error, null));
+    .catch(error => {
+      callback(error, null); 
+    });
   }
 
   /**

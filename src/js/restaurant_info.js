@@ -16,10 +16,12 @@ window.initMap = () => {
       });
       fillBreadcrumb();
       DBHelper.fetchReviewsByRestaurant(self.restaurant.id, (error, reviews) => {
-        // fill reviews
-        if (reviews && reviews.length) {
-          fillReviewsHTML(reviews);
+        if (!reviews) {
+          return;
         }
+        // fill reviews
+        self.restaurant.reviews = reviews;
+        fillReviewsHTML(self.restaurant.reviews);
       });
       DBHelper.mapMarkerForRestaurant(self.restaurant, self.map);
     }
@@ -72,13 +74,16 @@ fetchRestaurantFromURL = (callback) => {
     callback(error, null);
   } else {
     DBHelper.fetchRestaurantById(id, (error, restaurant) => {
-      self.restaurant = restaurant;
-      if (!restaurant) {
+      // if the restaurant was already fetched (from indexedDB cache) don't overwrite it
+      self.restaurant = self.restaurant || restaurant;
+      if (error) {
         console.error(error);
         return;
       }
-      fillRestaurantHTML();
-      callback(null, restaurant)
+      if (self.restaurant) {
+        fillRestaurantHTML();
+        callback(null, self.restaurant);
+      }
     });
   }
 }
@@ -147,9 +152,13 @@ fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => 
  */
 fillReviewsHTML = (reviews = self.restaurant.reviews) => {
   const container = document.getElementById('reviews-container');
-  const title = document.createElement('h3');
-  title.innerHTML = 'Reviews';
-  container.appendChild(title);
+  
+  if (container.querySelectorAll('.reviews-title').length === 0) { 
+    const title =  document.createElement('h3');
+    title.classList.add('reviews-title');
+    title.innerHTML = 'Reviews';
+    container.appendChild(title);
+  }
 
   if (!reviews) {
     const noReviews = document.createElement('p');
@@ -157,7 +166,9 @@ fillReviewsHTML = (reviews = self.restaurant.reviews) => {
     container.appendChild(noReviews);
     return;
   }
+
   const ul = document.getElementById('reviews-list');
+  ul.innerHTML = '';
   reviews.forEach(review => {
     ul.appendChild(createReviewHTML(review));
   });

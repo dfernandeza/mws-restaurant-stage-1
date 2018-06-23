@@ -65,6 +65,19 @@ section {
   display: block;
 }
 
+.hidden {
+  display: none;
+}
+
+#connection-status {
+  padding: 15px;
+  color: #da1d1d;
+  position: fixed;
+  width: 100%;
+  z-index: 2;
+  background: #fff;
+}
+
 #maincontent {
   background-color: #f3f3f3;
   min-height: 100%;
@@ -333,7 +346,7 @@ nav {
   text-align: center;
 }
 
-.restaurant-figure__caption {}
+/* .restaurant-figure__caption {} */
 
 #restaurant-img {
   width: 100%;

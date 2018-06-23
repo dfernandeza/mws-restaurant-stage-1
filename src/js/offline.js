@@ -25,7 +25,28 @@ function registerServiceWorker() {
 				// indexController._trackInstalling(reg.installing);
 			});
 		});
+
+		// Then later, request a one-off sync:
+		navigator.serviceWorker.ready.then(function(swRegistration) {
+			return swRegistration.sync.register('foodle-sync').catch((console.log));
+		});
 	});
 }
+
+// Connection Status
+function isOnline () {
+  var connectionStatus = document.getElementById('connection-status');
+
+  if (navigator.onLine){
+		// runRetryRequests();
+    connectionStatus.classList.add('hidden');
+  } else {
+		connectionStatus.classList.remove('hidden');
+  }
+}
+
+window.addEventListener('online', isOnline);
+window.addEventListener('offline', isOnline);
+isOnline();
 
 registerServiceWorker();

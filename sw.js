@@ -1,6 +1,9 @@
-const staticCache = 'foodle-static-v7';
+importScripts('/idb.js');
+
+const staticCache = 'foodle-static-v7.2';
 const imagesCache = 'foodle-images-v0';
 const allCaches = [staticCache, imagesCache];
+const methods = ['POST', 'PUT', 'DELETE'];
 
 self.addEventListener('install', function(event) {
   event.waitUntil(
@@ -51,11 +54,27 @@ self.addEventListener('fetch', function(event) {
     }
   }
 
+  if (/^\/(restaurants|reviews)'/.test(requestUrl.pathname) && methods.includes(event.request.method)) {
+    const req = event.request.clone();
+    event.respondWith(fetch(req)).catch(console.log);//
+    return;
+  }
+
   event.respondWith(
     caches
       .match(event.request)
       .then(response => response || fetch(event.request))
   );
+});
+
+self.addEventListener('sync', function(event) {
+  if (event.tag == 'foodle-sync') {
+    // event.waitUntil(doSomeStuff());
+    console.log('syncing...', idb);
+  } else {
+    // unknown sync, may be old, best to unregister
+    event.registration.unregister();
+  }
 });
 
 function servePhoto(request) {
