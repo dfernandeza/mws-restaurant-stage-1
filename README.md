@@ -2,13 +2,13 @@
 ---
 #### _Three Stage Course Material Project - Foodle_
 
-## Project: Stage 2
+## Project: Stage 3
 
 ### How to run the project
 
-At this stage we will be fetching data from a [API server](https://github.com/udacity/mws-restaurant-stage-2), please follow the instructions to run the API server [here](https://github.com/udacity/mws-restaurant-stage-2#development-local-api-server).
+At this stage we will be fetching data from a [API server](https://github.com/udacity/mws-restaurant-stage-3), please follow the instructions to run the API server [here](https://github.com/udacity/mws-restaurant-stage-3#local-development-api-server).
 
-Then, in roder to run the WebApp:
+Then, in order to run the WebApp:
 
 1. Go to project folder and run `npm install`
 
