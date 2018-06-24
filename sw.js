@@ -57,7 +57,7 @@ self.addEventListener('fetch', function(event) {
   if (/^\/(restaurants|reviews)/.test(requestUrl.pathname) && methods.includes(event.request.method)) {
     const req = event.request.clone();
     event.respondWith(fetch(event.request)
-    // Handle failed requests
+    // Cache failed requests to be able to retry
     .catch(error => {
       req.clone().json().then(body => {
         self.clients.matchAll().then(clients => 

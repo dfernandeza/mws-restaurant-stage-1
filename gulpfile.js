@@ -95,7 +95,7 @@ gulp.task('critical', function(cb) {
   critical.generate({
     inline: true,
     base: 'dist/',
-    src: 'index.html',
+    src: '../src/index.html',
     css: ['./dist/styles.css'],
     dimensions: [{
       width: 320,
